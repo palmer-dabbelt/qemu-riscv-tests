@@ -3,29 +3,26 @@
 pass:
         la a0, pass_msg
         jal puts
-        j shutdown
+        li a0, 0
+        j mee_shutdown
 
 fail:
         la a0, fail_msg
         jal puts
-        j shutdown
+        li a0, 1
+        j mee_shutdown
 
 puts:
-        li a2, UART_BASE
-1:      lbu a1, (a0)
+        addi sp, sp, -16
+        sd s0, -8(sp)
+        mv s0, a0
+1:      lbu a0, (s0)
         beqz a1, 3f
-2:      lw a3, UART_TX(a2)
-        bltz a3, 2b
-        sw a1, UART_TX(a2)
-        addi a0, a0, 1
+        call mee_tty_putc
+        addi s0, s0, 1
         j 1b
+        ld s0, -8(sp)
 3:      ret
-
-shutdown:
-        li      a0, TEST_BASE
-        li      a1, TEST_PASS
-        sw      a1, 0(a0)
-1:      j 1b
 
 .section .data
 
